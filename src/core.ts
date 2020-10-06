@@ -3,7 +3,7 @@ import { AWR, Callback, AWRNode, ComputedAWR } from './helpers';
 const isFn = (f: any) => typeof f === 'function';
 
 function isAwrObject(o: any) {
-  return isFn(o.setValue) && isFn(o.subscribe) && isFn(o.unsubscribe);
+  return isFn(o.subscribe) && isFn(o.unsubscribe) && o.__awr;
 }
 
 function awr<T, R = T>(v: AWR<T>, cb: (v: T) => R): ComputedAWR<T>;
@@ -48,6 +48,7 @@ function awr<T>(value: any, cb?: any): AWR<T> | AWRNode<T> {
     subscribe,
     unsubscribe,
     computed: false,
+    __awr: true,
   });
 }
 
@@ -56,12 +57,17 @@ function computed<T, R = T>(baseState: AWR<T>, c: (v: T) => R): ComputedAWR<R> {
 
   baseState.subscribe(newVal => state.setValue(c(newVal)));
 
-  return {
+  const result: ComputedAWR<R> = {
     computed: true,
     value: state.value,
     subscribe: state.subscribe,
     unsubscribe: state.unsubscribe,
   };
+
+  return {
+    __awr: true,
+    ...result,
+  } as any;
 }
 
 export default awr;
