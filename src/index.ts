@@ -1,15 +1,18 @@
 /* eslint-disable */
 import * as React from 'react';
 
-type Callback<T> = (oldVal: T, newVal: T) => void;
+type Callback<T> = (val: T) => void;
 
 type StateAction<S> = (v: S) => void | ((v: (prev: S) => S) => void);
-export type AWRResponse<T> = {
+
+export type AWR<T> = {
   value: T;
   setValue: StateAction<T>;
   subscribe: (callback: Callback<T>) => () => void;
   unsubscribe: (callback: Callback<T>) => void;
 };
+
+export type ComputedAWR<T> = Omit<AWR<T>, 'setValue'>;
 
 const isFn = (f: any) => typeof f === 'function';
 
@@ -17,10 +20,11 @@ function isAwrObject(o: any) {
   return isFn(o.setValue) && isFn(o.subscribe) && isFn(o.unsubscribe);
 }
 
-function awr<T, R = T>(v: AWRResponse<T>, cb: (v: T) => R): AWRResponse<T>;
-function awr<T>(v: T): AWRResponse<T>;
+function awr<T, R = T>(v: AWR<T>, cb: (v: T) => R): ComputedAWR<T>;
 
-function awr<T>(value: any, cb?: any): AWRResponse<T> {
+function awr<T>(v: T): AWR<T>;
+
+function awr<T>(value: any, cb?: any): AWR<T> | ComputedAWR<T> {
   if (isAwrObject(value) && cb) {
     return computed(value, cb);
   }
@@ -31,13 +35,11 @@ function awr<T>(value: any, cb?: any): AWRResponse<T> {
 
   let subscribers: Callback<any>[] = [];
 
-  const setValue: AWRResponse<T>['setValue'] = newValue => {
+  const setValue: AWR<T>['setValue'] = newValue => {
     const _newValue =
       typeof newValue === 'function' ? newValue(obj.value) : newValue;
 
-    subscribers.forEach(subscriber => {
-      subscriber(obj.value, _newValue);
-    });
+    subscribers.forEach(subscriber => subscriber(_newValue));
 
     obj.value = _newValue;
   };
@@ -58,23 +60,25 @@ function awr<T>(value: any, cb?: any): AWRResponse<T> {
   return Object.assign(obj, { setValue, subscribe, unsubscribe });
 }
 
-function computed<T, R = T>(r: AWRResponse<T>, c: (v: T) => R): AWRResponse<R> {
-  const _computedAWR = awr(c(r.value));
+function computed<T, R = T>(r: AWR<T>, c: (v: T) => R): ComputedAWR<R> {
+  const state = awr(c(r.value));
 
-  r.subscribe((oldVal, newVal) => {
-    _computedAWR.setValue(c(newVal));
-  });
+  r.subscribe(newVal => state.setValue(c(newVal)));
 
-  return _computedAWR;
+  return {
+    value: state.value,
+    subscribe: state.subscribe,
+    unsubscribe: state.unsubscribe,
+  };
 }
 
-function useAwr<T>(awr: AWRResponse<T>) {
+function useAwr<T>(awr: AWR<T>) {
   const _awr = React.useRef(awr);
   _awr.current = awr;
   const [value, setValue] = React.useState(awr.value);
 
   React.useEffect(
-    () => _awr.current.subscribe((old, newValue) => setValue(newValue)),
+    () => _awr.current.subscribe(newValue => setValue(newValue)),
     []
   );
 
