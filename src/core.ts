@@ -47,7 +47,7 @@ function awr<T>(value: any, cb?: any): AWR<T> | AWRNode<T> {
     setValue,
     subscribe,
     unsubscribe,
-    state: true,
+    computed: false,
   });
 }
 
