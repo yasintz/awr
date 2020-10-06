@@ -6,7 +6,7 @@ State management for react
 import { awr, useAwr } from 'awr';
 
 const counter = awr(0);
-const computedValue = awr(counter, n => `value: ${n}`);
+const computedValue = awr(counter, val => Math.sqrt(val));
 
 const CounterWriter = () => {
   const [value] = useAwr(counter);
@@ -25,10 +25,10 @@ const App = () => {
     <div>
       <CounterWriter />
       <ComputedWriter />
-      {/* hook tan gelen setValue fonksiyonunu kullanabilirsin. */}
+      {/* You can use the setValue function from the hook. */}
       <button onClick={() => setValue(prev => prev + 1)}>Increment</button>
 
-      {/* ayrica awr instance da calisacaktir.  */}
+      {/* It will also run on awr instance. */}
       <button onClick={() => counter.setValue(prev => prev - 1)}>
         Decrement
       </button>
@@ -37,7 +37,4 @@ const App = () => {
 };
 ```
 
-
 [Demo App](https://codesandbox.io/s/cool-williamson-cbfjd?file=/src/App.js)
-![output](https://user-images.githubusercontent.com/36041339/95005230-3a20eb00-05fe-11eb-8d82-d8e380f96c34.gif)
-
