@@ -1,12 +1,10 @@
 import * as React from 'react';
-import awr from './core';
-import { AWR, AWRNode, ComputedAWR } from './helpers';
+import { AWR, AWRNode, ComputedAWR, StateAction } from './helpers';
 
-function useAwr<
-  T,
-  A extends AWRNode<T> = AWR<T> | ComputedAWR<T>,
-  B extends boolean = A['computed']
->(awr: A): B extends false ? [T, AWR<T>['setValue']] : T {
+function useAwr<T>(awr: AWR<T>): [T, StateAction<T>];
+function useAwr<T>(awr: ComputedAWR<T>): T;
+
+function useAwr<T>(awr: AWRNode<T> & { setValue?: StateAction<T> }) {
   const _awr = React.useRef(awr);
   _awr.current = awr;
   const [value, setValue] = React.useState(awr.value);
@@ -16,17 +14,13 @@ function useAwr<
     []
   );
 
-  const awrSetValue = (awr as any).setValue;
+  const awrSetValue = awr.setValue;
+
   if (typeof awrSetValue === 'undefined') {
     return value as any;
   } else {
     return [value, awrSetValue] as any;
   }
 }
-
-const node = awr<string>();
-const cnode = awr(node, v => `Yasin ${v}`);
-const b = useAwr(node);
-const c = useAwr(cnode);
 
 export default useAwr;
