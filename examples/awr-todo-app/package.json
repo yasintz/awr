@@ -1,0 +1,25 @@
+{
+  "name": "awr-todo-app",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A highly testable TodoList app that uses awr",
+  "keywords": [],
+  "main": "src/index.js",
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "awr": "../../"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
