@@ -3,15 +3,21 @@ import { AWR, Callback, AWRNode, ComputedAWR } from './helpers';
 const isFn = (f: any) => typeof f === 'function';
 
 function isAwrObject(o: any) {
-  return isFn(o.subscribe) && isFn(o.unsubscribe) && o.__awr;
+  return (
+    o !== null &&
+    o !== undefined &&
+    isFn(o.subscribe) &&
+    isFn(o.unsubscribe) &&
+    o.__awr
+  );
 }
 
 function awr<T, R = T>(v: AWR<T>, cb: (v: T) => R): ComputedAWR<T>;
 
-function awr<T>(v?: T): AWR<T>;
+function awr<T>(v: T): AWR<T>;
 
 function awr<T>(value: any, cb?: any): AWR<T> | AWRNode<T> {
-  if (isAwrObject(value) && cb) {
+  if (isAwrObject(value) && isFn(cb)) {
     return computed(value, cb);
   }
 
