@@ -3,23 +3,23 @@
 State management for react
 
 ```jsx
-import { awr, useAwr } from 'awr';
+import awr from 'awr';
 
 const counter = awr(0);
-const computedValue = awr(counter, val => Math.sqrt(val));
+const computedValue = awr.computed(counter, val => Math.sqrt(val));
 
 const CounterWriter = () => {
-  const [value] = useAwr(counter);
+  const value = counter.useValue();
   return <h1>{value}</h1>;
 };
 
 const ComputedWriter = () => {
-  const [value] = useAwr(computedValue);
+  const value = computedValue.useValue();
   return <h1 style={{ color: 'red' }}>computed {value}</h1>;
 };
 
 const App = () => {
-  const [value, setValue] = useAwr(counter);
+  const [value, setValue] = counter.use();
 
   return (
     <div>
@@ -37,4 +37,4 @@ const App = () => {
 };
 ```
 
-[Demo App](https://codesandbox.io/s/cool-williamson-cbfjd?file=/src/App.js)
+[Demo App](https://codesandbox.io/s/cool-williamson-cbfjd)
